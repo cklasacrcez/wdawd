@@ -1,0 +1,101 @@
+## Spring Boot Vue.js PostgreSQL CRUD example
+
+We will build a full-stack Tutorial Application in that:
+
+- Each Tutorial has id, title, description, published status.
+- We can create, retrieve, update, delete Tutorials.
+- We can also find Tutorials by title.
+
+The images below shows screenshots of our System.
+
+– Add Tutorial:
+
+– Show all Tutorials:
+
+– Spring Boot exports REST Apis using Spring Web MVC & interacts with PostgreSQL Database using Spring JPA
+– Vue Client sends HTTP Requests and retrieve HTTP Responses using axios, shows data on the components. We also use Vue Router for navigating to pages.
+
+> You can also find the Spring REST Apis that works with MongoDB here:
+Spring Boot with MongoDB CRUD example using Spring Data
+
+## Spring Boot Rest Apis Back-end
+
+### Overview
+
+These are APIs that Spring Boot App will export:
+
+Then open **pom.xml** and add these dependencies:
+
+```js
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+We also need to add one more dependency for **PostgreSQL**:
+
+```js
+<dependency>
+	<groupId>org.postgresql</groupId>
+	<artifactId>postgresql</artifactId>
+	<scope>runtime</scope>
+</dependency>
+```
+
+## Configure Spring Datasource, JPA, Hibernate
+Under src/main/resources folder, open application.properties and write these lines.
+```js
+spring.datasource.url= jdbc:postgresql://localhost:5432/testdb
+spring.datasource.username= postgres
+spring.datasource.password= 123
+
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation= true
+spring.jpa.properties.hibernate.dialect= org.hibernate.dialect.PostgreSQLDialect
+
+# Hibernate ddl auto (create, create-drop, validate, update)
+spring.jpa.hibernate.ddl-auto= update
+```
+
+- `spring.datasource.username` & `spring.datasource.password` properties are the same as your database installation.
+- Spring Boot uses Hibernate for JPA implementation, we configure PostgreSQLDialect for PostgreSQL
+- `spring.jpa.hibernate.ddl-auto` is used for database initialization. We set the value to `update` value so that a table will be created in the database automatically corresponding to defined data model. Any change to the model will also trigger an update to the table. For production, this property should be validate
+
+## Define Data Model
+Our Data model is Tutorial with four fields: id, title, description, published.
+In **model** package, we define `Tutorial` class.
+```java
+package com.bezkoder.spring.jpa.postgresql.model;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "tutorials")
+public class Tutorial {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
+	@Column(name = "title")
+	private String title;
+
+	@Column(name = "description")
+	private String description;
+
+	@Column(name = "published")
+	private boolean published;
+	...
+}
+```
+
+* `@Entity` annotation indicates that the class is a persistent Java class.
+* `@Table` annotation provides the table that maps this entity.
+* `@Id` annotation is for the primary key.
+* `@GeneratedValue` annotation is used to define generation strategy for the primary key. GenerationType.AUTO means Auto Increment field.
+* `@Column` annotation is used to define the column in database that maps annotated field.
